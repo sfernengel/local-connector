@@ -32,6 +32,7 @@ export const post = async (request: Request, response: Response) => {
 
   const encodedMessageBody = pubSubMessage.data;
   const messageBody = decodeToJson(encodedMessageBody);
+  logger.info('>>>>>>', JSON.stringify(messageBody));
 
   // // For our example we will use the customer id as a var
   // // and the query the commercetools sdk with that info
