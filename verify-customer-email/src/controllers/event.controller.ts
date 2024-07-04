@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { createApiRoot } from '../client/create.client';
 import CustomError from '../errors/custom.error';
 import { logger } from '../utils/logger.utils';
+import { decodeToJson } from '../utils/decoder.utils';
 
 /**
  * Exposed event POST endpoint.
@@ -29,17 +30,22 @@ export const post = async (request: Request, response: Response) => {
   // Receive the Pub/Sub message
   const pubSubMessage = request.body.message;
 
-  // For our example we will use the customer id as a var
-  // and the query the commercetools sdk with that info
-  const decodedData = pubSubMessage.data
-    ? Buffer.from(pubSubMessage.data, 'base64').toString().trim()
-    : undefined;
+  const encodedMessageBody = pubSubMessage.data;
+  const messageBody = decodeToJson(encodedMessageBody);
 
-  if (decodedData) {
-    const jsonData = JSON.parse(decodedData);
+  // // For our example we will use the customer id as a var
+  // // and the query the commercetools sdk with that info
+  // const decodedData = pubSubMessage.data
+  //   ? Buffer.from(pubSubMessage.data, 'base64').toString().trim()
+  //   : undefined;
 
-    customerId = jsonData.customer.id;
-  }
+  // if (decodedData) {
+  //   const jsonData = JSON.parse(decodedData);
+
+  //   customerId = jsonData.customer.id;
+  // }
+
+  customerId = messageBody.customer.id;
 
   if (!customerId) {
     throw new CustomError(
