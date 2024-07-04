@@ -45,7 +45,7 @@ export const post = async (request: Request, response: Response) => {
   //   customerId = jsonData.customer.id;
   // }
 
-  customerId = messageBody.customer.id;
+  customerId = messageBody?.customer?.id;
 
   if (!customerId) {
     throw new CustomError(
