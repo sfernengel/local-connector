@@ -21,6 +21,7 @@ export const post = async (request: Request, response: Response) => {
     throw new CustomError(400, 'Bad request: No Pub/Sub message was received');
   }
 
+  logger.info('>>>>>>', JSON.stringify(request.body));
   // Check if the body comes in a message
   if (!request.body.message) {
     logger.error('Missing body message');
@@ -29,10 +30,11 @@ export const post = async (request: Request, response: Response) => {
 
   // Receive the Pub/Sub message
   const pubSubMessage = request.body.message;
+  logger.debug('>>>>>>', JSON.stringify(pubSubMessage));
 
   const encodedMessageBody = pubSubMessage.data;
   const messageBody = decodeToJson(encodedMessageBody);
-  logger.info('>>>>>>', JSON.stringify(messageBody));
+  logger.debug('>>>>>>', JSON.stringify(messageBody));
 
   // // For our example we will use the customer id as a var
   // // and the query the commercetools sdk with that info
@@ -46,13 +48,15 @@ export const post = async (request: Request, response: Response) => {
   //   customerId = jsonData.customer.id;
   // }
 
+  
   customerId = messageBody?.customer?.id;
 
   if (!customerId) {
-    throw new CustomError(
-      400,
-      'Bad request: No customer id in the Pub/Sub message'
-    );
+    // throw new CustomError(
+    //   400,
+    //   'Bad request: No customer id in the Pub/Sub message'
+    // );
+    return;
   }
 
   try {
