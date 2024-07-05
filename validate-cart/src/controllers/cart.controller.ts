@@ -56,7 +56,60 @@ const create = async (resource: Resource) => {
 };
 
 // Controller for update actions
-// const update = (resource: Resource) => {};
+const update = async (resource: Resource) => {
+  let sku = undefined;
+  let quantity = 0;
+
+  try {
+    const updateActions: Array<UpdateAction> = [];
+
+    // Deserialize the resource to a CartDraft
+    const cartDraft = JSON.parse(JSON.stringify(resource));
+
+    if (cartDraft.obj.lineItems.length !== 0) {
+      sku = cartDraft.obj.lineItems[0].variant.sku;
+      quantity = cartDraft.obj.lineItems[0].quantity;
+    }
+
+    // Check the inventory for a given sku
+    if (sku) {
+      const inventory = await createApiRoot()
+        .inventory()
+        .get({
+          queryArgs: {
+            where: `sku="${sku}"`,
+          },
+        })
+        .execute()
+        .then((res) => res.body.results?.[0]);
+
+      if (!inventory) {
+        throw new CustomError(400, `The inventory entry not found for: ${sku}`);
+      }
+
+      // Work with the inventories
+      if (inventory.availableQuantity < quantity) {
+        throw new CustomError(
+          400,
+          `Stock level for: ${sku} is less than: ${quantity}`
+        );
+      }
+    }
+
+    return { statusCode: 200, actions: updateActions };
+  } catch (error) {
+    if (error instanceof CustomError) {
+      console.log('1');
+      throw error;
+    } else if (error instanceof Error) {
+      console.log('2');
+      throw new CustomError(
+        400,
+        `Internal server error on CartController: ${error.stack}`
+      );
+    }
+  }
+};
 
 /**
  * Handle the cart controller according to the action
@@ -71,9 +124,10 @@ export const cartController = async (action: string, resource: Resource) => {
       const data = create(resource);
       return data;
     }
-    case 'Update':
-      break;
-
+    case 'Update': {
+      const data = update(resource);
+      return data;
+    }
     default:
       throw new CustomError(
         500,
