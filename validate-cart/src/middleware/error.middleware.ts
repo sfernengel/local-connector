@@ -1,5 +1,5 @@
-import { ErrorRequestHandler, NextFunction, Request, Response } from 'express';
-import CustomError from '../errors/custom.error';
+import { ErrorRequestHandler, Request, Response, NextFunction } from 'express';
+import { CustomError } from '../errors/custom.error'; // Assuming you have a custom error module
 
 /**
  * Middleware for error handling
@@ -9,23 +9,27 @@ import CustomError from '../errors/custom.error';
  * @param next
  * @returns
  */
-export const errorMiddleware = (
-  error: ErrorRequestHandler,
+export const errorMiddleware: ErrorRequestHandler = (
+  error: any,
   req: Request,
   res: Response,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   next: NextFunction
 ) => {
-  if (error instanceof CustomError) {
-    if (typeof error.statusCode === 'number') {
-      res.status(error.statusCode).json({
-        message: error.message,
-        errors: error.errors,
-      });
+  console.error(error); // Log the entire error object for debugging
 
-      return;
-    }
+  if (error instanceof CustomError) {
+    res.status(error.statusCode).json({
+      errors: error.errors,
+    });
+    return;
   }
 
-  res.status(500).send('Internal server error');
+  res.status(500).json({
+    errors: [
+      {
+        code: 'InternalServerError',
+        message: 'Internal server error',
+      },
+    ],
+  });
 };

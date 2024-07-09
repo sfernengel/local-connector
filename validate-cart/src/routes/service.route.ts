@@ -5,29 +5,16 @@ import CustomError from '../errors/custom.error';
 
 const serviceRouter = Router();
 
-serviceRouter.post('/', async (req, res) => {
+serviceRouter.post('/', async (req, res, next) => {
   logger.info('Cart update extension executed');
 
-  const { action, resource } = req.body;
   try {
-    await cartController(action, resource);
+    const { action, resource } = req.body;
+    const { statusCode, actions } = (await cartController(action, resource))!;
+    res.status(statusCode).json(actions);
   } catch (error) {
-    if (error instanceof CustomError) {
-      if (typeof error.statusCode === 'number') {
-        res.status(error.statusCode).json({
-          message: error.message,
-          errors: error.errors,
-        });
-
-        return;
-      }
-    }
-
-    res.status(500).send('Internal server error');
+    next(error); // Pass the error to the error handling middleware
   }
-
-  res.status(200);
-  res.send();
 });
 
 export default serviceRouter;
