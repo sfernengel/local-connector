@@ -16,7 +16,7 @@ export const errorMiddleware: ErrorRequestHandler = (
   res: Response,
   next: NextFunction
 ) => {
-  logger.error(error); // Log the entire error object for debugging
+  // logger.error(error); // Log the entire error object for debugging
 
   if (error instanceof CustomError) {
     res.status(error.statusCode).json({
