@@ -1,5 +1,6 @@
 import { ErrorRequestHandler, Request, Response, NextFunction } from 'express';
 import { CustomError } from '../errors/custom.error'; // Assuming you have a custom error module
+import { logger } from '../utils/logger.utils';
 
 /**
  * Middleware for error handling
@@ -15,7 +16,7 @@ export const errorMiddleware: ErrorRequestHandler = (
   res: Response,
   next: NextFunction
 ) => {
-  console.error(error); // Log the entire error object for debugging
+  logger.error(error); // Log the entire error object for debugging
 
   if (error instanceof CustomError) {
     res.status(error.statusCode).json({
