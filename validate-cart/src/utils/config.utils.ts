@@ -20,11 +20,12 @@ export const readConfiguration = () => {
   const validationErrors = getValidateMessages(envValidators, envVars);
 
   if (validationErrors.length) {
-    throw new CustomError(
-      'InvalidEnvironmentVariablesError',
-      'Invalid Environment Variables please check your .env file',
-      validationErrors
-    );
+    throw new CustomError(400, [
+      {
+        code: 'InvalidEnvironmentVariablesError',
+        message: `Invalid Environment Variables please check your .env file ${validationErrors}`,
+      },
+    ]);
   }
 
   return envVars;

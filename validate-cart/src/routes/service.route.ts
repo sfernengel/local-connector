@@ -8,7 +8,7 @@ serviceRouter.post('/', async (req, res, next) => {
   logger.info('Cart update extension executed');
 
   try {
-    await post(req, res!;
+    await post(req, res!);
   } catch (error) {
     next(error); // Pass the error to the error handling middleware
   }
